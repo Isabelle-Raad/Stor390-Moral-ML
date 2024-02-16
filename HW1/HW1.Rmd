@@ -1,0 +1,28 @@
+---
+title: "Stor390HW1"
+author: "Isabelle Raad"
+date: "2024-01-18"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We have now seen three ethical theories as well as their pitfalls.  We have also thoroughly discussed their applications to the justifiability of chat GPT.
+
+Now it is your turn to demonstrate your own understanding and mastery of these philosophical concepts.  To what extent, or under what circumstances, is the use of Chat-GPT justifiable in academic settings?  Use (at least) one of the above principles as a supporting argument for your position.  Argue for your position in one page or less.
+
+In no more than half a page, consider and refute a potential objection to the position you staked out in the above question.
+
+------------------------------------------------------------------
+
+Artificial intelligences like Chat GPT are justifiable *only* when completing tasks you already know how to complete. Further, one should be able to independently produce the *same* result. In this sense, they are no different than using a calculator, which have been acceptable for years. An example of this is completing Picard iterations. Sure, one could do these by hand, if their integration skills are up to par. However, these integrals get larger and larger as our number of steps approaches infinity. Time spent manually computing these integrals may be reallocated to figuring out what this result actually means for our analyses. Another acceptable use of AIs like GPT is spelling and grammar checking. Of course, one could go through the editing process and catch the same spelling and grammatical errors as an AI, but we again run into the same time argument. If we finish with the same result, then the time used to manually check for spelling and grammar mistakes could instead be spent producing more original thought or editing content. In both examples of AI use, the probability of mistakes is curbed. Not only are we completing these editing or integrating tasks more efficiently, but we are completing them more effectively. It is very easy to miscalculate an integral or misspell a word, but this is less of a worry with AI use.
+
+The logic of these examples is very utilitarian. Hence, it is no surprise that I am taking a consequentialist approach to this argument. In the eyes of a consequentialist, the result of a decision determines moral correctness more than the means achieving the result and the reasoning for making a decision. The goal is to maximize positive output at the lowest moral cost. Returning to my previous examples, if we use AI solely to produce results that we could independently produce, we are not creating any harmful output. Instead, our output may even have less flaws. Indeed, using AI for these mundane tasks increases our utility and therefore our ability to continue to produce even more.
+
+Some would argue that my consequentialist views favor expanding GPT's use to tasks beyond the simple and reproducible. This may include writing emails, outlining papers, and producing code. Indeed, using GPT to write an email does minimize the time and mental energy required to do so. Hence, this must be the most utilitarian result, as it redistributes time/energy resources to allow for higher productivity. However, this argument is flawed, as it fails to consider the negative consequences of this action. If students begin using an artificial intelligence as part of their creative process, overall utility is in fact decreased. We begin to lose one of the most important aspects of collaborative learning: diverse perspective. Students will be led to regurgitate the same facts and arguments that AI gives them, leading to an overwhelming uniformity of ideas. Additionally, students will be robbing themselves of chances to exercise autonomous thinking. This is a skill that cannot be reproduced as easily as an integral. It continues to better itself with more and more practice. Hence, quality of education is diminished.
+
+While my preferred philosophy is consequentialism, we could of course also view GPT from the perspectives of deontology and virtue ethics. My position holds steadfast from the deontological point of view. Chat GPT takes in billions of sources. Any time a student used Chat GPT, they can make its instrumentation known, but they cannot properly cite the many sources that GPT has picked information from. Without proper acknowledgement, the authors of these sources are simply treated as a means to an end. They are not given credit where it is due. Thus, the use of GPT is not deontologically sound. We reach a similar conclusion when viewing GPT from a virtue ethics standpoint. I will consider three virtues: patience, integrity, and fairness. A student who uses GPT foregoes the opportunity to cultivate patience, as they are expediting the process of completing necessary academic tasks. This is indeed done at the sense of integrity. The ideas that a student puts forth are not entirely independent thought. I view the integrity of the students entire work as compromised, as they are disrespecting the purpose of the assignment by taking shortcuts. Finally, we may consider fairness. In Monday's class, some students called attention to certain drawbacks of GPT 3.5, such as its lack of mathematical abilities. Another student then chimed in, stating that she pays twenty dollars a month in order to gain access to GPT 4.0. This paywall begets inequity-- now the quality of GPT aid that a student recieves is dependent on whether they are able to pay $240 a year. That is half of rent!
