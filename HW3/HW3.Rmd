@@ -24,8 +24,7 @@ plot(x, col=y)
 
 ```
 
-
-##
+# 1
 
 Quite clearly, the above data is not linearly separable.  Create a training-testing partition with 100 random observations in the training partition.  Fit an svm on this training data using the radial kernel, and tuning parameters $\gamma=1$, cost $=1$.  Plot the svm on the training data.  
 
@@ -59,7 +58,7 @@ points(x, col = y, pch = 19)
 points(test, pch = 4, cex = 1.5)
 ```
 
-##
+# 2
 
 Notice that the above decision boundary is decidedly non-linear.  It seems to perform reasonably well, but there are indeed some misclassifications.  Let's see if increasing the cost ^[Remember this is a parameter that decides how smooth your decision boundary should be] helps our classification error rate.  Refit the svm with the radial kernel, $\gamma=1$, and a cost of 10000.  Plot this svm on the training data. 
 
@@ -78,13 +77,13 @@ points(x, col = y, pch = 19)
 points(test, pch = 4, cex = 1.5)
 ```
 
-##
+# 3
 
 It would appear that we are better capturing the training data, but comment on the dangers (if any exist), of such a model. 
 
 It is true that increasing cost allows the model to more precisely fit our training data. However, this also leaves room for overfitting. Our model is warped in order to more precisely capture each individual point of our training data, even if this is not reflected in our population as a whole. Indeed, increasingly concave and disconnected areas were created in our region that would predict class two in order to individually accommodate points of class one in our training data set. However, points of class two in our testing data set still lie in these areas, and thus were misclassified.
 
-##
+# 4
 
 Create a confusion matrix by using this svm to predict on the current testing partition.  Comment on the confusion matrix.  Is there any disparity in our classification results?    
 
@@ -95,8 +94,7 @@ table(true=dat[-train_index,"y"], pred=predict(svmfit2,
 
 The confusion matrix reveals a disparity in our ability to correctly classify data points. We are more likely to misclassify state one as state two (occurring 17 of 79 instances of state 1) than state two as state one (occurring 3 of 21 instances of state 1). Our model's bias towards falsely predicting state two may be due to overfitting in the model.
 
-
-##
+# 5
 
 Is this disparity because of imbalance in the training/testing partition?  Find the proportion of class `2` in your training partition and see if it is broadly representative of the underlying 25\% of class 2 in the data as a whole.  
 
@@ -127,13 +125,12 @@ table(true=dat[-train_index,"y"], pred=predict(tune.out$best.model,
                                                newdata=dat[-train_index,]))
 ```
 
-##
+# 6
 
 Comment on the confusion matrix.  How have we improved upon the model in question 2 and what qualifications are still necessary for this improved model.  
 
 6 of 79 members of class one were misclassified as class two, a great improvement from the previous model's 17 misclassifications as class two. The number of class two events misclassified as class one remains the same. This model seems to have decreased bias towards falsely classifying as class two.
 
-# 
 Let's turn now to decision trees.  
 
 ```{r}
@@ -144,7 +141,7 @@ library(tree)
 
 ```
 
-## 
+# 7
 
 The response variable is currently a categorical variable with four levels.  Convert heart disease into binary categorical variable.  Then, ensure that it is properly stored as a factor. 
 
@@ -155,7 +152,7 @@ levels(heart$class) <- c("no disease", "disease")
 str(heart$class)
 ```
 
-## 
+# 8
 
 Train a classification tree on a 240 observation training subset (using the seed I have set for you).  Plot the tree.  
 
@@ -172,8 +169,7 @@ plot(treeh)
 text(treeh, pretty=0)
 ```
 
-
-## 
+# 9
 
 Use the trained model to classify the remaining testing points.  Create a confusion matrix to evaluate performance.  Report the classification error rate.  
 
@@ -189,7 +185,7 @@ confh
 
 The classification error rate is 19.29%.
 
-##  
+# 10
 
 Above we have a fully grown (bushy) tree.  Now, cross validate it using the `cv.tree` command.  Specify cross validation to be done according to the misclassification rate.  Choose an ideal number of splits, and plot this tree.  Finally, use this pruned tree to test on the testing set.  Report a confusion matrix and the misclassification rate.  
 
@@ -206,7 +202,7 @@ plot(pruned)
 text(pruned, pretty=0)
 ```
 
-##
+# 11
 
 Discuss the trade-off in accuracy and interpretability in pruning the above tree. 
 
@@ -219,7 +215,7 @@ confprun
 
 Our pruned tree is more interpretable, with fewer deciding variables being included in this tree. However, our misclassification rate has increased by about 5%. Some may find this tradeoff worthwhile, as it reduces the number of (potentially confusing) variables. However, some situations may require no loss of accuracy. Thus, this trade-off should be evaluated situationally.
 
-## 
+# 12
 
 Discuss the ways a decision tree could manifest algorithmic bias.  
 
