@@ -98,9 +98,11 @@ The confusion matrix reveals a disparity in our ability to correctly classify da
 
 Is this disparity because of imbalance in the training/testing partition?  Find the proportion of class `2` in your training partition and see if it is broadly representative of the underlying 25\% of class 2 in the data as a whole.  
 
-```{r}
+```{r, include=FALSE}
 library(tidyverse)
+```
 
+```{r}
 nrow(filter(train, y == 2)) / nrow(train)
 ```
 
