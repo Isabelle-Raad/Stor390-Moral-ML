@@ -1,0 +1,186 @@
+---
+title: "HW 4"
+author: "IZ Raad"
+date: "12/29/2023"
+output:
+  pdf_document: default
+  html_document:
+    number_sections: true
+---
+
+This homework is designed to give you practice fitting a logistic regression and working with statistical/philosophical measures of fairness.  We will work with the `titanic` dataset which we have previously seen in class in connection to decision trees.  
+
+Below I will preprocess the data precisely as we did in class.  You can simply refer to `data_train` as your training data and `data_test` as your testing data.  
+
+```{r}
+
+#this is all of the preprocessing done for the decision trees lecture.  
+
+path <- 'https://raw.githubusercontent.com/guru99-edu/R-Programming/master/titanic_data.csv'
+titanic <-read.csv(path)
+head(titanic)
+
+library(dplyr)
+
+#replace ? with NA
+replace_question_mark <- function(x) {
+  if (is.character(x)) {
+    x <- na_if(x, "?")
+  }
+  return(x)
+}
+
+titanic <- titanic %>%
+  mutate_all(replace_question_mark)
+
+set.seed(678)
+shuffle_index <- sample(1:nrow(titanic))
+head(shuffle_index)
+
+titanic <- titanic[shuffle_index, ]
+head(titanic)
+
+library(dplyr)
+# Drop variables
+clean_titanic <- titanic %>%
+select(-c(home.dest, cabin, name, x, ticket)) %>% 
+#Convert to factor level
+    mutate(pclass = factor(pclass, levels = c(1, 2, 3), labels = c('Upper', 'Middle', 'Lower')),
+    survived = factor(survived, levels = c(0, 1), labels = c('No', 'Yes'))) %>%
+na.omit()
+#previously were characters
+clean_titanic$age <- as.numeric(clean_titanic$age)
+clean_titanic$fare <- as.numeric(clean_titanic$fare)
+glimpse(clean_titanic)
+
+create_train_test <- function(data, size = 0.8, train = TRUE) {
+    n_row = nrow(data)
+    total_row = size * n_row
+    train_sample <- 1: total_row
+    if (train == TRUE) {
+        return (data[train_sample, ])
+    } else {
+        return (data[-train_sample, ])
+    }
+}
+data_train <- create_train_test(clean_titanic, 0.8, train = TRUE)
+data_test <- create_train_test(clean_titanic, 0.8, train = FALSE)
+
+```
+
+# 1
+
+Create a table reporting the proportion of people in the training set surviving the Titanic.  Do the same for the testing set.  Comment on whether the current training-testing partition looks suitable.  
+
+```{r}
+data_train %>% group_by(survived) %>% summarize(`proportion of train` = n()/nrow(data_train))
+data_test %>% group_by(survived) %>% summarize(`proportion of test` = n()/nrow(data_test))
+```
+
+There are some discrepancies between the testing and training sets. The test set sees about a five percent increase in survival rate. However, this five percent increase is not so extreme that it renders our current partition unsuitable.
+
+# 2
+
+Use the `glm` command to build a logistic regression on the training partition.  `survived` should be your response variable and `pclass`, `sex`, `age`, `sibsp`, and `parch` should be your predictor variables.  
+
+```{r}
+model <- glm(survived~pclass+sex+age+sibsp+parch, family=binomial(link="logit"),
+             data=data_train)
+model
+```
+
+We would now like to test whether this classifier is *fair* across the sex subgroups.  It was reported that women and children were prioritized on the life-boats and as a result survived the incident at a much higher rate.  Let us see if our model is able to capture this fact.  
+
+# 3
+
+Subset your test data into a male group and a female group.  Then, use the `predict` function on the male testing group to come up with predicted probabilities of surviving the Titanic for each male in the testing set.  Do the same for the female testing group.  
+
+```{r}
+# Subsetting the testing data into male and female groups.
+data_testm <- data_test %>% filter(sex == 'male')
+data_testf <- data_test %>% filter(sex == 'female')
+
+# Computing the predicted probabilities of surviving the Titanic for members of each group.
+predictedm <- predict(model, newdata=data_testm, type="response")
+predictedf <- predict(model, newdata=data_testf, type="response")
+
+# Let's see how the distributions of each group line up.
+summary(predictedm)
+summary(predictedf)
+```
+
+# 4
+
+Now recall that for this logistic *regression* to be a true classifier, we need to pair it with a decision boundary.  Use an `if-else` statement to translate any predicted probability in the male group greater than $0.5$ into `Yes` (as in Yes this individual is predicted to have survived).  Likewise an predicted probability less than $0.5$ should be translated into a `No`.  
+
+Do this for the female testing group as well, and then create a confusion matrix for each of the male and female test set predictions.  You can use the `confusionMatrix` command as seen in class to expidite this process as well as provide you necessary metrics for the following questions.  
+
+```{r}
+library(caret)
+
+# Pairing the predicted probabilities with a decision boundary to yield a classifier.
+fitted.resultsm <- ifelse(predictedm>0.5, "Yes", "No")
+fitted.resultsf <- ifelse(predictedf>0.5, "Yes", "No")
+
+# Creating a confusion matrix for male and female test sets.
+confusionm <- confusionMatrix(as.factor(fitted.resultsm), data_testm$survived, positive="Yes")
+confusionf <- confusionMatrix(as.factor(fitted.resultsf), data_testf$survived, positive="Yes")
+
+confusionm
+confusionf
+```
+
+# 5
+
+We can see that indeed, at least within the testing groups, women did seem to survive at a higher proportion than men (24.8\% to 76.3\% in the testing set).  Print a summary of your trained model and interpret one of the fitted coefficients in light of the above disparity.  
+
+```{r}
+summary(model)
+```
+
+Upon viewing coefficients of our model, we see that the most impactful predictors of our model are sex and class. The predictor associated with sex (sexmale) has the largest absolute coefficient, meaning that it has the greatest influence on our the log of our prediction (and therefore our true prediction as well). Because the coefficient of sexmale is negative, we may interpret this as being male decreases model predicted survivability (doing so at the greatest magnitude). Indeed, this is a reflection of the true disparity of survivability displayed in our test set, as more women survived than men.
+
+# 6
+
+Now let's see if our model is *fair* across this explanatory variable.  Calculate five measures (as defined in class) in this question: the Overall accuracy rate ratio between females and males, the disparate impact between females and males, the statistical parity between females and males, and the predictive equality as well as equal opportunity between females and males (collectively these last two comprise equalized odds).  Set a reasonable $\epsilon$ each time and then comment on which (if any) of these five criteria are met.  
+
+```{r}
+mtrueyes <- confusionm$table['Yes', 'Yes']
+mfalseyes <- confusionm$table['Yes', 'No']
+mfalseno <- confusionm$table['No', 'Yes']
+mtrueno <- confusionm$table['No', 'No']
+ftrueyes <- confusionf$table['Yes', 'Yes']
+ffalseyes <- confusionf$table['Yes', 'No']
+ffalseno <- confusionf$table['No', 'Yes']
+ftrueno <- confusionf$table['No', 'No']
+numberm <- mtrueyes+mfalseyes+mfalseno+mtrueno
+numberf <- ftrueyes+ffalseyes+ffalseno+ftrueno
+
+# Overall accuracy rate ratio between females and males
+confusionm$overall['Accuracy'] /  confusionf$overall['Accuracy']
+
+# Disparate impact between females and males
+((mtrueyes+mfalseyes)/numberm) / ((ftrueyes+ffalseyes)/numberf)
+
+# Statistical parity between females and males
+abs(((mtrueyes+mfalseyes)/numberm) - ((ftrueyes+ffalseyes)/numberf))
+
+# Predictive equality between females and males
+abs((ffalseyes/(ffalseyes + ftrueno)) - (mfalseyes/(mfalseyes + mtrueno)))
+
+# Equal opportunity between females and males
+abs((mtrueyes/(mtrueyes+mfalseno)) - (ftrueyes/(ftrueyes+ffalseno)))
+```
+
+Our choice of epsilon is 0.2, following legal precedents. With that, our model passes only one of our criteria. Our ratio of accuracy is about 0.95, which is greater than 0.8. The model doesn't tend to make mistakes in classifying one gender significantly more than it does when classifying the other. However, criteria that look at *how* cases are being classified are not passed.
+
+Our disparate impact is much less than 0.8. The proportion of males classified as surviving is significantly less than the proportion of females classified as surviving. Statistical parity, predictive equality, and equal opportunity are all less than 0.2. The failure to meet the statistical parity criterion indicates that there is more than a 20% difference between the proportions of females and males that are classified as surviving. The lack of predictive equality indicates that the percentage of nonsurviving females misclassified as surviving is more than 20% greater than that of nonsurvivng males (or, there is a discrepancy in "false positives"). The lack of equal opportunity indicates that there is more than a 20% difference between surviving females and males that are correctly classified. That is, a model is more likely to identify a survivor if they are female. Overall, while the accuracy of the model is comparable between the genders, differences lie in how the model makes mistakes and where the model is correct.
+
+It is always important for us to interpret our results in light of the original data and the context of the analysis.  In this case, it is relevant that we are analyzing a historical event post-facto and any disparities across demographics identified are unlikely to be replicated.  So even though our model fails numerous of the statistical fairness criteria, I would argue we need not worry that our model could be misused to perpetuate discrimination in the future.  After all, this model is likely not being used to prescribe a preferred method of treatment in the future.  
+
+# 7
+
+Even so, provide a *philosophical* notion of justice or fairness that may have motivated the Titanic survivors to act as they did. Spell out what this philosophical notion or principle entails?
+
+I think this boils down to equity vs equality. Passengers have ruled against equality (which would lead to each passenger being treated the same) and in favor of equity (circumstantial allocation of resources). Women and children tend to be weaker, so they should have spots on the life rafts. The "stronger" men can supposedly swim or float for a little bit until a rescue boat comes (at least, they may have a better shot of surviving until a rescue boat's arrival).
+
