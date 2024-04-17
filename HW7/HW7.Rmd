@@ -1,0 +1,100 @@
+---
+title: 'Homework 7 '
+author: "IZ Raad"
+date: "4/17/2024"
+output:
+  pdf_document: default
+  html_document:
+    number_sections: true
+---
+
+# 1
+Recall that in class we showed that for randomized response differential privacy based on a fair coin (that is a coin that lands heads up with probability $0.5$), the estimated proportion of incriminating observations $\hat{P}$ ^[in class this was the estimated proportion of students having actually cheated] was given by $\hat{P} = 2\pi-\frac{1}{2}$ where $\pi$ is the proportion of people answering affirmative to the incriminating question.  
+
+I want you to generalize this result for a potentially biased coin.  That is, for a differentially private mechanism that uses a coin landing heads up with probability $0 \leq \theta \leq 1$, find an estimate $\hat{P}$ for the proportion of incriminating observations.  This expression should be in terms of $\theta$ and $\pi$.  
+
+I am formulating this under the assumption that a first result of heads implies that the second flip will determine if we give an incriminating answer (heads again) or a nonincriminating answer (tails). A frist flip of tails implies that we state the truth regardless.
+
+$$\pi = \theta^2 + (1-\theta)\hat{P}$$
+$$\hat{P}=\frac{\pi-\theta^2}{1-\theta}$$
+
+# 2
+Next, show that this expression reduces to our result from class in the special case where $\theta = \frac{1}{2}$.
+
+$$\hat{P}=\frac{\pi-\theta^2}{1-\theta}$$
+$$\hat{P}=\frac{\pi-\frac{1}{2}^2}{1-\frac{1}{2}}$$
+$$\hat{P}=\frac{\pi-\frac{1}{4}}{\frac{1}{2}}$$
+$$\hat{P}=2\pi-\frac{1}{2}$$
+
+# 3
+Consider the additive feature attribution model: $g(x') = \phi_0+\sum_{i=1}^M{\phi_ix_i'}$ where we are aiming to explain prediction $f$ with model $g$ around input $x$ with simplified input $x'$.  Moreover, $M$ is the number of input features.  
+
+Give an expression for the explanation model $g$ in the case where all attributes are meaningless, and interpret this expression.  Secondly, give an expression for the relative contribution of feature $i$ to the explanation model.  
+
+**Student Answer**
+
+# 4
+Part of having an explainable model is being able to implement the algorithm from scratch.  Let's try and do this with `KNN`.  Write a function entitled `chebychev` that takes in two vectors and outputs the Chebychev or $L^\infty$ distance between said vectors.  I will test your function on two vectors below.  Then, write a `nearest_neighbors` function that finds the user specified $k$ nearest neighbors according to a user specified distance function (in this case $L^\infty$) to a user specified data point observation.  
+
+```{r}
+chebychev <- function(x, y){
+  return(max(abs(x-y)))
+}
+
+nearest_neighbors = function(x, obs, k, dist_func){
+  dist = apply(x, 1, dist_func, obs) 
+  distances = sort(dist)[1:k]
+  neighbor_list = which(dist %in% sort(dist)[1:k])
+  return(list(neighbor_list, distances))
+}
+
+x<- c(3,4,5)
+y<-c(7,10,1)
+chebychev(x,y)
+
+```
+
+# 5
+Finally create a `knn_classifier` function that takes the nearest neighbors specified from the above functions and assigns a class label based on the mode class label within these nearest neighbors.  I will then test your functions by finding the five nearest neighbors to the very last observation in the `iris` dataset according to the `chebychev` distance and classifying this function accordingly.  
+
+```{r}
+library(class)
+df <- data(iris) 
+
+knn_classifier = function(x,y){
+  groups = table(x[,y])
+  pred = groups[groups == max(groups)]
+  return(pred)
+}
+
+#data less last observation
+x = iris[1:(nrow(iris)-1),]
+#observation to be classified
+obs = iris[nrow(iris),]
+
+#find indices of 5 nearest neighbors in iris using cols 1:4 ("nearest" using L-inf norm)
+ind = nearest_neighbors(x[,1:4], obs[,1:4], 5, chebychev)[[1]]
+
+#show columns 1:4 of 5 nearest neighbors as a matrix
+as.matrix(x[ind,1:4])
+
+#show columns 1:4 of our observation
+obs[,1:4]
+
+#classify our obs using nearest neighbors... mode species of our nearest neighbors
+knn_classifier(x[ind,], 'Species')
+
+#what is the actual observed species
+obs[,'Species']
+```
+
+# 6
+Interpret this output.  Did you get the correct classification?  Also, if you specified $K=5$, why do you have $7$ observations included in the output dataframe?
+
+The first matrix in our output displays the sepal length, sepal width, petal length, and petal width out the nearest neighbors of our observation, found using our k nearest neighbors function. This matrix contains seven neighbors rather than the specified five because our nearest neighbors function operates by returning data points whose distance to our observation is equal to one of the five lowest distances (in our case, distance is defined by the L-infinity norm). It is entirely possible that our iris data set had three Chebychev distances tied for fifth closest. Thus, all of the associated data points were returned, totaling to seven neighbors returned by our function. The second output is a dataframe showing the sepal length, sepal width, petal length, and petal width of the observation we are trying to classify. Next, we see that we classify our observation as virginica, with five neighbors belonging to this category. Indeed, we have correctly classified our observation, as the final output shows that its true species is virginica (one of three species: setosa, versicolor, and virginica).
+
+# 7
+Earlier in this unit we learned about Google's DeepMind assisting in the management of acute kidney injury.  Assistance in the health care sector is always welcome, particularly if it benefits the well-being of the patient.  Even so, algorithmic assistance necessitates the acquisition and retention of sensitive health care data.  With this in mind, who should be privy to this sensitive information?  In particular, is data transfer allowed if the company managing the software is subsumed?  Should the data be made available to insurance companies who could use this to better calibrate their actuarial risk but also deny care?  Stake a position and defend it using principles discussed from the class.  
+
+**Student Answer**
+
