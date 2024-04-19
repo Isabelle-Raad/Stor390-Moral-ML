@@ -31,7 +31,9 @@ Consider the additive feature attribution model: $g(x') = \phi_0+\sum_{i=1}^M{\p
 
 Give an expression for the explanation model $g$ in the case where all attributes are meaningless, and interpret this expression.  Secondly, give an expression for the relative contribution of feature $i$ to the explanation model.  
 
-**Student Answer**
+If all attributes are meaningless, it is simply the case that $g = \phi_0$. If the input features have no effect on the prediction of the model, then $\phi_i = 0$ for $i \in 1 ... M$. Therefore, the value of the series simplifies to zero. Therefore, regardless of model input, we have that g will always yield a prediction of $\phi_0$ (i.e. the model is constant).
+
+Based on my response to the first part of the question, we see that if the total contribution of all features is given by $\sum_{i=1}^M{\phi_ix_i'}$, then the relative contribution of each feature $i$ is $\phi_ix_i'$ (proportionally, $\frac{\phi_ix_i'}{\sum_{i=1}^M{\phi_ix_i'}}$). That is, the input of each feature is weighted by $\phi_i$.
 
 # 4
 Part of having an explainable model is being able to implement the algorithm from scratch.  Let's try and do this with `KNN`.  Write a function entitled `chebychev` that takes in two vectors and outputs the Chebychev or $L^\infty$ distance between said vectors.  I will test your function on two vectors below.  Then, write a `nearest_neighbors` function that finds the user specified $k$ nearest neighbors according to a user specified distance function (in this case $L^\infty$) to a user specified data point observation.  
